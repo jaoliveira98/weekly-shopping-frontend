@@ -3,23 +3,19 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export function MealsPage() {
-  const [meals, setMeals] = useState([
-    { name: "aaa", quantity: "bbb" },
-    { name: "zxc", quantity: "asd" },
-    { name: "qwe", quantity: "bbb" },
-  ]);
-  // useEffect(() => {
-  //   axios
-  //     .get("https://localhost:5000/api/v1/meal")
-  //     .then((response) => {
-  //       // handle success
-  //       setMeals(response);
-  //     })
-  //     .catch((error) => {
-  //       // handle error
-  //       console.log(error);
-  //     });
-  // }, []);
+  const [meals, setMeals] = useState([]);
+  useEffect(() => {
+    axios
+      .get("https://localhost:5000/api/v1/meal")
+      .then((response) => {
+        // handle success
+        setMeals(response);
+      })
+      .catch((error) => {
+        // handle error
+        console.log(error);
+      });
+  }, []);
 
   return (
     <>
