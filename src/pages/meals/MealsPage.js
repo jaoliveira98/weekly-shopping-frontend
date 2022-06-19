@@ -9,7 +9,7 @@ export function MealsPage() {
       .get("https://localhost:5000/api/v1/meal")
       .then((response) => {
         // handle success
-        setMeals(response);
+        setMeals(response.data);
       })
       .catch((error) => {
         // handle error

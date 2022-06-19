@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { MealsPage } from "./pages/meals/MealsPage";
 import { HomePage } from "./pages/home/HomePage";
+import { AddMeals } from "./pages/meals/AddMeals";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />}></Route>
         <Route path="/meals" element={<MealsPage />}></Route>
+        <Route path="/meals/create" element={<AddMeals />}></Route>
       </Routes>
     </BrowserRouter>
   );
