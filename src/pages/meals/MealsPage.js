@@ -32,7 +32,7 @@ export function MealsPage() {
       <div className="grid grid-cols-2 gap-4">
         {meals.map((meal) => {
           return (
-            <div className="w-full">
+            <div className="w-full" key={meal.id}>
               <img
                 src="https://static.onecms.io/wp-content/uploads/sites/44/2019/08/26231113/5783153.jpg"
                 alt="meal"

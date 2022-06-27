@@ -1,30 +1,49 @@
-import { Link } from "react-router-dom";
+import axios from "axios";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { PrimaryButton } from "../../components/PrimaryButton";
+import { TextInput } from "../../components/TextInput";
+import { Header } from "../../components/Header";
 
 export function AddMeals() {
+  const [meal, setMeal] = useState("");
+
+  let navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    axios
+      .post("https://localhost:5000/api/v1/meal", {
+        name: meal,
+      })
+      .then(function (response) {
+        console.log(response);
+        navigate("/meals");
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
+  const handleMeal = (value) => {
+    setMeal(value);
+  };
+
   return (
     <div className="p-8">
       <div className="flex">
-        <Link to="../meals" className="mr-6">
-          ←
-        </Link>
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-800">Add Meals</h1>
-          <p>Add your craving options</p>
-        </div>
+        <Header
+          title="Add meal"
+          description="Add your craving options"
+        ></Header>
       </div>
-      <form>
-        <label className="flex flex-col">
-          Name:
-          <input
-            type="text"
-            name="name"
-            className="shadow appearance-none border rounded py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
-          />
-        </label>
-        Name:
-        <div className="shadow appearance-none border rounded py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline">
-          Name:
-        </div>
+      <form className="my-4" onSubmit={handleSubmit}>
+        <TextInput
+          label="Meal name"
+          value={meal}
+          onChange={handleMeal}
+        ></TextInput>
+        <PrimaryButton type="submit">Add meal</PrimaryButton>{" "}
       </form>
     </div>
   );
