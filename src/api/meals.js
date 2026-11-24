@@ -41,10 +41,19 @@ const writeStored = (meals) => localStorage.setItem(STORAGE_KEY, JSON.stringify(
 
 const newId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
-export const listMeals = async () => (apiUrl() ? request('GET') : readStored());
+export const listMeals = async () => {
+    if (!apiUrl()) return readStored();
+    const meals = await request('GET');
+    if (!Array.isArray(meals)) throw new Error('The meal list from the backend is not a list');
+    return meals.filter(isMeal);
+};
 
-export const getMeal = async (id) =>
-    apiUrl() ? request('GET', `/${id}`) : readStored().find((meal) => meal.id === id) ?? null;
+export const getMeal = async (id) => {
+    if (!apiUrl()) return readStored().find((meal) => meal.id === id) ?? null;
+    const meal = await request('GET', `/${id}`);
+    if (meal !== null && !isMeal(meal)) throw new Error('The meal from the backend is badly formed');
+    return meal;
+};
 
 export const createMeal = async ({ name, ingredients }) => {
     if (apiUrl()) return request('POST', '', { name, ingredients });

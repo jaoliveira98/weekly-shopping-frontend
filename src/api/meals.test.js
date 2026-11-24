@@ -119,6 +119,34 @@ describe('meals kept by the backend', () => {
         expect(await getMeal('1')).toBeNull();
     });
 
+    test.each([
+        ['an object', {}],
+        ['nothing', null],
+        ['text', 'meals'],
+    ])('a meal list answered as %s is an error', async (_, body) => {
+        answer(body);
+
+        await expect(listMeals()).rejects.toThrow('The meal list');
+    });
+
+    test('badly formed meals in the backend list are skipped', async () => {
+        const good = { id: '1', ...pasta };
+        answer([
+            null,
+            { id: '2', name: 'No ingredients' },
+            { id: '3', name: 'No quantity', ingredients: [{ product: { name: 'Rice' }, quantity: null }] },
+            good,
+        ]);
+
+        expect(await listMeals()).toEqual([good]);
+    });
+
+    test('a badly formed meal from the backend is an error', async () => {
+        answer({ id: '1', name: 'Pasta', ingredients: null });
+
+        await expect(getMeal('1')).rejects.toThrow('The meal');
+    });
+
     test('a meal id the backend cannot read finds nothing', async () => {
         answer(null, false, 400);
 
