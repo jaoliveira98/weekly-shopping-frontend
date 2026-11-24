@@ -1,0 +1,99 @@
+import { createMeal, deleteMeal, getMeal, listMeals, updateMeal } from './meals';
+
+const pasta = {
+    name: 'Pasta',
+    ingredients: [{ product: { name: 'Spaghetti' }, quantity: 1 }],
+};
+
+describe('meals kept in the browser', () => {
+    beforeEach(() => {
+        localStorage.clear();
+        delete process.env.REACT_APP_API_URL;
+    });
+
+    test('a created meal is listed and found by id', async () => {
+        const created = await createMeal(pasta);
+
+        expect(created.id).toEqual(expect.any(String));
+        expect(await listMeals()).toEqual([{ id: created.id, ...pasta }]);
+        expect(await getMeal(created.id)).toEqual({ id: created.id, ...pasta });
+    });
+
+    test('meals survive a reload', async () => {
+        const created = await createMeal(pasta);
+
+        expect(JSON.parse(localStorage.getItem('meals'))).toEqual([{ id: created.id, ...pasta }]);
+    });
+
+    test('an update replaces the name and ingredients', async () => {
+        const created = await createMeal(pasta);
+        const soup = { name: 'Soup', ingredients: [{ product: { name: 'Carrot' }, quantity: 3 }] };
+
+        await updateMeal(created.id, soup);
+
+        expect(await listMeals()).toEqual([{ id: created.id, ...soup }]);
+    });
+
+    test('a deleted meal is gone', async () => {
+        const first = await createMeal(pasta);
+        const second = await createMeal({ ...pasta, name: 'Salad' });
+
+        await deleteMeal(first.id);
+
+        expect(await listMeals()).toEqual([{ id: second.id, ...pasta, name: 'Salad' }]);
+    });
+
+    test('an unknown id finds nothing', async () => {
+        expect(await getMeal('missing')).toBeNull();
+    });
+});
+
+describe('meals kept by the backend', () => {
+    beforeEach(() => {
+        process.env.REACT_APP_API_URL = 'http://api.test';
+        global.fetch = jest.fn();
+    });
+
+    afterEach(() => {
+        delete process.env.REACT_APP_API_URL;
+        delete global.fetch;
+    });
+
+    const answer = (body, ok = true, status = 200) =>
+        fetch.mockResolvedValueOnce({ ok, status, json: async () => body });
+
+    test('lists meals from the meal endpoint', async () => {
+        answer([{ id: '1', ...pasta }]);
+
+        expect(await listMeals()).toEqual([{ id: '1', ...pasta }]);
+        expect(fetch).toHaveBeenCalledWith('http://api.test/api/v1/meal', expect.objectContaining({ method: 'GET' }));
+    });
+
+    test('creates, updates and deletes through the meal endpoint', async () => {
+        answer({ id: '1', ...pasta });
+        answer({ id: '1', ...pasta });
+        answer(null);
+
+        await createMeal(pasta);
+        await updateMeal('1', pasta);
+        await deleteMeal('1');
+
+        expect(fetch.mock.calls.map(([url, init]) => [init.method, url, init.body])).toEqual([
+            ['POST', 'http://api.test/api/v1/meal', JSON.stringify(pasta)],
+            ['PUT', 'http://api.test/api/v1/meal/1', JSON.stringify(pasta)],
+            ['DELETE', 'http://api.test/api/v1/meal/1', undefined],
+        ]);
+    });
+
+    test('a missing meal finds nothing', async () => {
+        answer(null, false, 404);
+
+        expect(await getMeal('1')).toBeNull();
+    });
+
+    test('a refused request throws', async () => {
+        answer(null, false, 400);
+
+        await expect(createMeal(pasta)).rejects.toThrow('400');
+    });
+});
