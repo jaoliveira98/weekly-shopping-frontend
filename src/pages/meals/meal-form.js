@@ -92,13 +92,17 @@ function MealForm({ id }) {
             {status === 'failed' && <p className="text-red-600">The meal could not be loaded.</p>}
             {(status === 'ready' || status === 'saving') && (
                 <form onSubmit={save} noValidate className="flex flex-col gap-4">
-                    <ul role="alert" className="text-red-600 empty:hidden">
-                        {errors.map((error) => (
-                            <li key={`${error.field} ${error.message}`} id={`${error.field}-error`}>
-                                {error.message}
-                            </li>
-                        ))}
-                    </ul>
+                    <div role="alert" className="empty:hidden">
+                        {errors.length > 0 && (
+                            <ul className="text-red-600">
+                                {errors.map((error) => (
+                                    <li key={`${error.field} ${error.message}`} id={`${error.field}-error`}>
+                                        {error.message}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
                     <label className="flex flex-col gap-1 font-bold">
                         Name
                         <input
@@ -133,7 +137,10 @@ function MealForm({ id }) {
                                 <button
                                     type="button"
                                     aria-label={`Remove ingredient ${index + 1}`}
-                                    onClick={() => setRows((shown) => shown.filter((_, at) => at !== index))}
+                                    onClick={() => {
+                                        setRows((shown) => shown.filter((_, at) => at !== index));
+                                        setErrors([]);
+                                    }}
                                     className="px-3 rounded-md bg-slate-200 font-bold"
                                 >
                                     Remove

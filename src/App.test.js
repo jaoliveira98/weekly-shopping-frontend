@@ -209,6 +209,37 @@ test('a failed save announces the errors, marks the bad boxes and moves focus to
     expect(screen.getByLabelText('Quantity 1')).toHaveFocus();
 });
 
+test('the error list keeps its list role inside the announced area', () => {
+    renderAt('/meals/new');
+
+    userEvent.click(screen.getByRole('button', { name: 'Save meal' }));
+
+    const list = within(screen.getByRole('alert')).getByRole('list');
+    expect(within(list).getAllByRole('listitem')).toHaveLength(2);
+});
+
+test('removing a row clears the error marks so none point at the wrong row', () => {
+    renderAt('/meals/new');
+    userEvent.type(screen.getByLabelText('Name'), 'Stir fry');
+    userEvent.type(screen.getByLabelText('Ingredient 1'), 'Rice');
+    userEvent.type(screen.getByLabelText('Quantity 1'), '1');
+    userEvent.click(screen.getByRole('button', { name: 'Add ingredient' }));
+    userEvent.type(screen.getByLabelText('Ingredient 2'), 'Salt');
+    userEvent.click(screen.getByRole('button', { name: 'Add ingredient' }));
+    userEvent.type(screen.getByLabelText('Ingredient 3'), 'Oil');
+    userEvent.type(screen.getByLabelText('Quantity 3'), '2');
+    userEvent.click(screen.getByRole('button', { name: 'Save meal' }));
+    expect(screen.getByLabelText('Quantity 2')).toHaveAttribute('aria-invalid', 'true');
+
+    userEvent.click(screen.getByRole('button', { name: 'Remove ingredient 1' }));
+
+    expect(screen.getByLabelText('Ingredient 1')).toHaveValue('Salt');
+    expect(screen.getByLabelText('Ingredient 2')).toHaveValue('Oil');
+    expect(document.querySelectorAll('[aria-invalid="true"]')).toHaveLength(0);
+    expect(document.querySelectorAll('[aria-describedby]')).toHaveLength(0);
+    expect(screen.getByRole('alert')).toBeEmptyDOMElement();
+});
+
 test('a form with no ingredient rows marks the missing ingredient on the Add ingredient button', () => {
     renderAt('/meals/new');
 
