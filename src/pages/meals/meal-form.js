@@ -96,13 +96,13 @@ function MealForm() {
                     <fieldset className="flex flex-col gap-2 min-w-0">
                         <legend className="font-bold mb-1">Ingredients</legend>
                         {rows.map((row, index) => (
-                            <div key={index} className="flex gap-2">
+                            <div key={index} className="flex flex-wrap sm:flex-nowrap gap-2">
                                 <input
                                     aria-label={`Ingredient ${index + 1}`}
                                     placeholder="Ingredient"
                                     value={row.name}
                                     onChange={(event) => changeRow(index, 'name', event.target.value)}
-                                    className="flex-1 min-w-0 px-3 py-2 rounded-md border border-slate-300"
+                                    className="w-full sm:w-auto sm:flex-1 min-w-0 px-3 py-2 rounded-md border border-slate-300"
                                 />
                                 <input
                                     aria-label={`Quantity ${index + 1}`}
@@ -111,7 +111,7 @@ function MealForm() {
                                     min="1"
                                     value={row.quantity}
                                     onChange={(event) => changeRow(index, 'quantity', event.target.value)}
-                                    className="w-24 px-3 py-2 rounded-md border border-slate-300"
+                                    className="w-32 px-3 py-2 rounded-md border border-slate-300"
                                 />
                                 <button
                                     type="button"
