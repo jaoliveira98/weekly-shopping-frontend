@@ -46,6 +46,34 @@ describe('meals kept in the browser', () => {
     test('an unknown id finds nothing', async () => {
         expect(await getMeal('missing')).toBeNull();
     });
+
+    test.each(['not json', 'null', '{}', '"text"', '42'])('a stored %s reads as no meals and saving still works', async (stored) => {
+        localStorage.setItem('meals', stored);
+
+        expect(await listMeals()).toEqual([]);
+        const created = await createMeal(pasta);
+        expect(await listMeals()).toEqual([{ id: created.id, ...pasta }]);
+    });
+
+    test('badly formed meals are skipped', async () => {
+        const good = { id: 'g', ...pasta };
+        localStorage.setItem(
+            'meals',
+            JSON.stringify([
+                null,
+                'Pasta',
+                { id: 'a', name: 'No ingredients' },
+                { id: 'b', ingredients: [] },
+                { name: 'No id', ingredients: [] },
+                { id: 'c', name: 'Bad ingredient', ingredients: [{ quantity: 1 }] },
+                { id: 'd', name: 'Bad quantity', ingredients: [{ product: { name: 'Rice' }, quantity: 'lots' }] },
+                good,
+            ])
+        );
+
+        expect(await listMeals()).toEqual([good]);
+        expect(await getMeal('a')).toBeNull();
+    });
 });
 
 describe('meals kept by the backend', () => {
@@ -89,6 +117,12 @@ describe('meals kept by the backend', () => {
         answer(null, false, 404);
 
         expect(await getMeal('1')).toBeNull();
+    });
+
+    test('a meal id the backend cannot read finds nothing', async () => {
+        answer(null, false, 400);
+
+        expect(await getMeal('not-an-id')).toBeNull();
     });
 
     test('a refused request throws', async () => {

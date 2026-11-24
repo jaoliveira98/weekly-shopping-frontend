@@ -8,12 +8,34 @@ const request = async (method, path = '', body) => {
         headers: body ? { 'Content-Type': 'application/json' } : undefined,
         body: body ? JSON.stringify(body) : undefined,
     });
-    if (method === 'GET' && response.status === 404) return null;
+    if (method === 'GET' && path && [400, 404].includes(response.status)) return null;
     if (!response.ok) throw new Error(`The meal request failed with ${response.status}`);
     return method === 'DELETE' ? null : response.json();
 };
 
-const readStored = () => JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
+const isObject = (value) => typeof value === 'object' && value !== null;
+
+const isIngredient = (ingredient) =>
+    isObject(ingredient) &&
+    isObject(ingredient.product) &&
+    typeof ingredient.product.name === 'string' &&
+    Number.isInteger(ingredient.quantity);
+
+const isMeal = (meal) =>
+    isObject(meal) &&
+    typeof meal.id === 'string' &&
+    typeof meal.name === 'string' &&
+    Array.isArray(meal.ingredients) &&
+    meal.ingredients.every(isIngredient);
+
+const readStored = () => {
+    try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
+        return Array.isArray(stored) ? stored.filter(isMeal) : [];
+    } catch {
+        return [];
+    }
+};
 
 const writeStored = (meals) => localStorage.setItem(STORAGE_KEY, JSON.stringify(meals));
 
