@@ -134,11 +134,18 @@ describe('meals kept by the backend', () => {
         answer([
             null,
             { id: '2', name: 'No ingredients' },
-            { id: '3', name: 'No quantity', ingredients: [{ product: { name: 'Rice' }, quantity: null }] },
+            { id: '3', name: 'Bad quantity', ingredients: [{ product: { name: 'Rice' }, quantity: 'lots' }] },
             good,
         ]);
 
         expect(await listMeals()).toEqual([good]);
+    });
+
+    test('a meal with an ingredient whose quantity is null stays listed', async () => {
+        const noAmount = { id: '4', name: 'Rice bowl', ingredients: [{ product: { name: 'Salt' }, quantity: null }] };
+        answer([noAmount]);
+
+        expect(await listMeals()).toEqual([noAmount]);
     });
 
     test('a badly formed meal from the backend is an error', async () => {

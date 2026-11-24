@@ -19,7 +19,7 @@ const isIngredient = (ingredient) =>
     isObject(ingredient) &&
     isObject(ingredient.product) &&
     typeof ingredient.product.name === 'string' &&
-    Number.isInteger(ingredient.quantity);
+    (ingredient.quantity === null || Number.isInteger(ingredient.quantity));
 
 const isMeal = (meal) =>
     isObject(meal) &&

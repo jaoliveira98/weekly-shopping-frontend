@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { deleteMeal, listMeals } from '../../api/meals';
 
 const describeIngredients = (ingredients) =>
-    ingredients.map(({ product, quantity }) => `${quantity} ${product.name}`).join(', ');
+    ingredients
+        .map(({ product, quantity }) => (quantity === null ? product.name : `${quantity} ${product.name}`))
+        .join(', ');
 
 function Meals() {
     const [meals, setMeals] = useState(null);

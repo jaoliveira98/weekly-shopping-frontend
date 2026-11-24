@@ -186,6 +186,29 @@ describe('meals saved in a bad shape', () => {
     });
 });
 
+test('an ingredient with no quantity shows without an amount and the meal stays listed', async () => {
+    localStorage.setItem(
+        'meals',
+        JSON.stringify([
+            { id: 'r', name: 'Rice bowl', ingredients: [{ product: { name: 'Rice' }, quantity: 2 }, { product: { name: 'Salt' }, quantity: null }] },
+        ])
+    );
+    renderAt('/meals');
+
+    expect(await screen.findByText('2 Rice, Salt')).toBeInTheDocument();
+});
+
+test('editing an ingredient with no quantity shows an empty quantity box', async () => {
+    localStorage.setItem(
+        'meals',
+        JSON.stringify([{ id: 'r', name: 'Rice bowl', ingredients: [{ product: { name: 'Salt' }, quantity: null }] }])
+    );
+    renderAt('/meals/r/edit');
+
+    expect(await screen.findByLabelText('Ingredient 1')).toHaveValue('Salt');
+    expect(screen.getByLabelText('Quantity 1')).toHaveValue(null);
+});
+
 test('a failed save announces the errors, marks the bad boxes and moves focus to the first', () => {
     renderAt('/meals/new');
 

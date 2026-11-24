@@ -5,7 +5,7 @@ import { createMeal, getMeal, updateMeal } from '../../api/meals';
 const emptyRow = { name: '', quantity: '' };
 
 const toRows = (ingredients) =>
-    ingredients.map(({ product, quantity }) => ({ name: product.name, quantity: String(quantity) }));
+    ingredients.map(({ product, quantity }) => ({ name: product.name, quantity: quantity === null ? '' : String(quantity) }));
 
 const validateMeal = (name, rows) => {
     const errors = [];
